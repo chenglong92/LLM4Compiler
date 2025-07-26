@@ -18,9 +18,13 @@ agent = LL.TriTransformAgent()
 #pdb.set_trace()
 num_rows = len(C_CUDA_Data)
 #
-for i in range(20, num_rows, 1):
+for i in range(0, num_rows, 1):
     print(f"===================id: {i}====================")
     filename = "./CUDA_C_Results/" + str(i) + "_main.cpp"
+    filename_cpp = "./CUDA_C_Results/" + str(i) + "_cpp_opt.cpp"
+    if os.path.isfile(filename) and os.path.isfile(filename_cpp):
+        print(f"id = {i} has been finished, jump to the next one!!")
+        continue
     GV.ABS_SAVE_PATH = "./CUDA_C_Results/"
     GV.FILE_INDEX = i
     #
