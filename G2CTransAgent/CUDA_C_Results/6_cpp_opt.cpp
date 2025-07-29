@@ -1,9 +1,11 @@
 // Optimized code(id = 6): 
 
-void incKernel(int* g_out, int* g_in, int N, int inner_reps) {
-            for (int idx = 0; idx < N; ++idx) {
-                for (int i = 0; i < inner_reps; ++i) {
-                    g_out[idx] = g_in[idx] + 1;
+void Kernel_Sum_backward_opt2(float* db, float* sum, int r_sum, int c) {
+            for (int j = 0; j < c; ++j) {
+                float temp = 0;
+                for (int i = 0; i < r_sum; ++i) {
+                    temp += sum[i * c + j];
                 }
+                db[j] = temp;
             }
         }

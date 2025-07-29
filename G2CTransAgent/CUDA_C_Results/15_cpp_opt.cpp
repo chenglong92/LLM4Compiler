@@ -1,8 +1,12 @@
 // Optimized code(id = 15): 
 
-void estimateSnr(const float* corrSum, const int* corrValidCount, const float* maxval, float* snrValue, const int size) {
-    for (int idx = 0; idx < size; ++idx) {
-        float mean = (corrSum[idx] - maxval[idx] * maxval[idx]) / (corrValidCount[idx] - 1);
-        snrValue[idx] = maxval[idx] * maxval[idx] / mean;
+void cpuMatrMultD(float* Ad, float* Bd, float* Cd, int rowsA, int colsA, int colsB) {
+    for (int i = 0; i < rowsA; ++i) {
+        for (int j = 0; j < colsB; ++j) {
+            Cd[i * colsB + j] = 0;
+            for (int k = 0; k < colsA; ++k) {
+                Cd[i * colsB + j] += Ad[i * colsA + k] * Bd[k * colsB + j];
+            }
+        }
     }
 }

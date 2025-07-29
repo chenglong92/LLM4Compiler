@@ -1,11 +1,13 @@
 // Optimized code(id = 1): 
 
-void boundaryCorrectIndexes(int* d_in, int* d_out, int length, int N) {
-            for (int tid = 0; tid < length; ++tid) {
-                if (d_in[tid] > N) {
-                    d_out[tid] = N;
-                } else {
-                    d_out[tid] = d_in[tid];
-                }
+void naive_sgemm(float* C, float* A, float* B, long size) {
+    for (long i = 0; i < size; ++i) {
+        for (long j = 0; j < size; ++j) {
+            float val = 0.0f;
+            for (long k = 0; k < size; ++k) {
+                val += A[i * size + k] * B[k * size + j];
             }
+            C[i * size + j] += val;
         }
+    }
+}

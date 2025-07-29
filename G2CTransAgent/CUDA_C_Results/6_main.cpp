@@ -6,6 +6,7 @@ __global__ void Kernel_Sum_backward_opt2 ( float * db , float * sum , int r_sum 
 
 #include <iostream>
         #include <cassert>
+        #include <cstring>
 
         void Kernel_Sum_backward_opt2(float* db, float* sum, int r_sum, int c) {
             for (int j = 0; j < c; ++j) {
@@ -17,71 +18,69 @@ __global__ void Kernel_Sum_backward_opt2 ( float * db , float * sum , int r_sum 
             }
         }
 
+        void test_normal_case() {
+            const int r_sum = 3;
+            const int c = 4;
+            float sum[r_sum * c] = {1.0f, 2.0f, 3.0f, 4.0f,
+                                    5.0f, 6.0f, 7.0f, 8.0f,
+                                    9.0f, 10.0f, 11.0f, 12.0f};
+            float db[c] = {0.0f};
+
+            Kernel_Sum_backward_opt2(db, sum, r_sum, c);
+
+            assert(db[0] == 15.0f);
+            assert(db[1] == 18.0f);
+            assert(db[2] == 21.0f);
+            assert(db[3] == 24.0f);
+
+            std::cout << "Normal case test passed." << std::endl;
+        }
+
+        void test_edge_case_empty_matrix() {
+            const int r_sum = 0;
+            const int c = 0;
+            float* sum = nullptr;
+            float* db = nullptr;
+
+            Kernel_Sum_backward_opt2(db, sum, r_sum, c);
+
+            std::cout << "Edge case (empty matrix) test passed." << std::endl;
+        }
+
+        void test_edge_case_single_row() {
+            const int r_sum = 1;
+            const int c = 3;
+            float sum[r_sum * c] = {1.0f, 2.0f, 3.0f};
+            float db[c] = {0.0f};
+
+            Kernel_Sum_backward_opt2(db, sum, r_sum, c);
+
+            assert(db[0] == 1.0f);
+            assert(db[1] == 2.0f);
+            assert(db[2] == 3.0f);
+
+            std::cout << "Edge case (single row) test passed." << std::endl;
+        }
+
+        void test_edge_case_single_column() {
+            const int r_sum = 4;
+            const int c = 1;
+            float sum[r_sum * c] = {1.0f, 2.0f, 3.0f, 4.0f};
+            float db[c] = {0.0f};
+
+            Kernel_Sum_backward_opt2(db, sum, r_sum, c);
+
+            assert(db[0] == 10.0f);
+
+            std::cout << "Edge case (single column) test passed." << std::endl;
+        }
+
         int main() {
-            // Test case 1: Single row and single column
-            {
-                float db[1] = {0};
-                float sum[1] = {5.0f};
-                int r_sum = 1;
-                int c = 1;
-                Kernel_Sum_backward_opt2(db, sum, r_sum, c);
-                assert(db[0] == 5.0f);
-            }
+            test_normal_case();
+            test_edge_case_empty_matrix();
+            test_edge_case_single_row();
+            test_edge_case_single_column();
 
-            // Test case 2: Multiple rows and single column
-            {
-                float db[1] = {0};
-                float sum[] = {1.0f, 2.0f, 3.0f};
-                int r_sum = 3;
-                int c = 1;
-                Kernel_Sum_backward_opt2(db, sum, r_sum, c);
-                assert(db[0] == 6.0f);
-            }
-
-            // Test case 3: Single row and multiple columns
-            {
-                float db[3] = {0};
-                float sum[] = {1.0f, 2.0f, 3.0f};
-                int r_sum = 1;
-                int c = 3;
-                Kernel_Sum_backward_opt2(db, sum, r_sum, c);
-                assert(db[0] == 1.0f);
-                assert(db[1] == 2.0f);
-                assert(db[2] == 3.0f);
-            }
-
-            // Test case 4: Multiple rows and multiple columns
-            {
-                float db[2] = {0};
-                float sum[] = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f};
-                int r_sum = 3;
-                int c = 2;
-                Kernel_Sum_backward_opt2(db, sum, r_sum, c);
-                assert(db[0] == 9.0f); // 1 + 3 + 5
-                assert(db[1] == 12.0f); // 2 + 4 + 6
-            }
-
-            // Test case 5: Empty rows (r_sum = 0)
-            {
-                float db[2] = {0};
-                float sum[] = {1.0f, 2.0f};
-                int r_sum = 0;
-                int c = 2;
-                Kernel_Sum_backward_opt2(db, sum, r_sum, c);
-                assert(db[0] == 0.0f);
-                assert(db[1] == 0.0f);
-            }
-
-            // Test case 6: Empty columns (c = 0)
-            {
-                float db[1] = {0};
-                float sum[] = {1.0f, 2.0f, 3.0f};
-                int r_sum = 3;
-                int c = 0;
-                Kernel_Sum_backward_opt2(db, sum, r_sum, c);
-                // No assertion as db is not modified when c = 0
-            }
-
-            std::cout << "All test cases passed!" << std::endl;
+            std::cout << "All tests passed successfully." << std::endl;
             return 0;
         }

@@ -1,12 +1,8 @@
 // Optimized code(id = 16): 
 
-void upsweep_scan(int twod, int N, int* output) {
-            int twod1 = twod * 2;
-            int num_threads = (N + twod1 - 1) / twod1; // Calculate the number of threads needed
-            for (int i = 0; i < num_threads; ++i) {
-                int idx = i * twod1;
-                if (idx + twod1 - 1 < N) {
-                    output[idx + twod1 - 1] += output[idx + twod - 1];
-                }
+void estimateSnr(const float* corrSum, const int* corrValidCount, const float* maxval, float* snrValue, int size) {
+            for (int idx = 0; idx < size; ++idx) {
+                float mean = (corrSum[idx] - maxval[idx] * maxval[idx]) / (corrValidCount[idx] - 1);
+                snrValue[idx] = maxval[idx] * maxval[idx] / mean;
             }
         }

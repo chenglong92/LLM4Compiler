@@ -1,12 +1,9 @@
 // Optimized code(id = 14): 
 
-void cpuMatrMultD(float* Ad, float* Bd, float* Cd, int rowsA, int colsA, int colsB) {
-    for (int i = 0; i < rowsA; ++i) {
-        for (int j = 0; j < colsB; ++j) {
-            Cd[i * colsB + j] = 0;
-            for (int k = 0; k < colsA; ++k) {
-                Cd[i * colsB + j] += Ad[i * colsA + k] * Bd[k * colsB + j];
+void copy_swap(float* f_in, float* f_target, const int L_x) {
+            for (int k_x = 0; k_x < L_x; ++k_x) {
+                float tempval = f_in[k_x];
+                f_in[k_x] = f_target[k_x];
+                f_target[k_x] = tempval;
             }
         }
-    }
-}

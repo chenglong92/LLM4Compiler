@@ -17,81 +17,89 @@ __global__ void set_valid_mask ( const float * score , float score_thr , int * v
             }
         }
 
-        void test_all_above_threshold() {
-            const int dims = 5;
-            float scores[dims] = {0.9f, 1.1f, 2.0f, 3.5f, 0.6f};
-            float threshold = 0.5f;
-            int valid_mask[dims] = {0};
-            
-            set_valid_mask(scores, threshold, valid_mask, dims);
-            
-            for (int i = 0; i < dims; ++i) {
-                assert(valid_mask[i] == 1);
+        void test_set_valid_mask() {
+            // Test case 1: All scores above threshold
+            {
+                const float scores[] = {0.8f, 0.9f, 1.0f, 1.1f};
+                const float threshold = 0.7f;
+                int mask[4];
+                set_valid_mask(scores, threshold, mask, 4);
+                assert(mask[0] == 1 && mask[1] == 1 && mask[2] == 1 && mask[3] == 1);
             }
-            std::cout << "test_all_above_threshold passed" << std::endl;
-        }
 
-        void test_all_below_threshold() {
-            const int dims = 4;
-            float scores[dims] = {0.1f, 0.2f, 0.3f, 0.4f};
-            float threshold = 0.5f;
-            int valid_mask[dims] = {0};
-            
-            set_valid_mask(scores, threshold, valid_mask, dims);
-            
-            for (int i = 0; i < dims; ++i) {
-                assert(valid_mask[i] == 0);
+            // Test case 2: All scores below threshold
+            {
+                const float scores[] = {0.4f, 0.5f, 0.6f, 0.3f};
+                const float threshold = 0.7f;
+                int mask[4];
+                set_valid_mask(scores, threshold, mask, 4);
+                assert(mask[0] == 0 && mask[1] == 0 && mask[2] == 0 && mask[3] == 0);
             }
-            std::cout << "test_all_below_threshold passed" << std::endl;
-        }
 
-        void test_mixed_scores() {
-            const int dims = 6;
-            float scores[dims] = {0.1f, 0.6f, 0.4f, 0.7f, 0.3f, 0.9f};
-            float threshold = 0.5f;
-            int valid_mask[dims] = {0};
-            int expected[dims] = {0, 1, 0, 1, 0, 1};
-            
-            set_valid_mask(scores, threshold, valid_mask, dims);
-            
-            for (int i = 0; i < dims; ++i) {
-                assert(valid_mask[i] == expected[i]);
+            // Test case 3: Mixed scores
+            {
+                const float scores[] = {0.8f, 0.5f, 1.0f, 0.3f};
+                const float threshold = 0.7f;
+                int mask[4];
+                set_valid_mask(scores, threshold, mask, 4);
+                assert(mask[0] == 1 && mask[1] == 0 && mask[2] == 1 && mask[3] == 0);
             }
-            std::cout << "test_mixed_scores passed" << std::endl;
-        }
 
-        void test_empty_array() {
-            const int dims = 0;
-            float scores[1] = {0.0f};  // dummy
-            float threshold = 0.5f;
-            int valid_mask[1] = {0};   // dummy
-            
-            set_valid_mask(scores, threshold, valid_mask, dims);
-            // Should not crash or produce any errors
-            std::cout << "test_empty_array passed" << std::endl;
-        }
-
-        void test_equal_to_threshold() {
-            const int dims = 3;
-            float scores[dims] = {0.5f, 0.5f, 0.5f};
-            float threshold = 0.5f;
-            int valid_mask[dims] = {0};
-            
-            set_valid_mask(scores, threshold, valid_mask, dims);
-            
-            for (int i = 0; i < dims; ++i) {
-                assert(valid_mask[i] == 0);
+            // Test case 4: Empty array
+            {
+                const float scores[] = {};
+                const float threshold = 0.7f;
+                int mask[0];
+                set_valid_mask(scores, threshold, mask, 0);
+                // No assertion needed as it should just not crash
             }
-            std::cout << "test_equal_to_threshold passed" << std::endl;
+
+            // Test case 5: Single element above threshold
+            {
+                const float scores[] = {0.8f};
+                const float threshold = 0.7f;
+                int mask[1];
+                set_valid_mask(scores, threshold, mask, 1);
+                assert(mask[0] == 1);
+            }
+
+            // Test case 6: Single element below threshold
+            {
+                const float scores[] = {0.6f};
+                const float threshold = 0.7f;
+                int mask[1];
+                set_valid_mask(scores, threshold, mask, 1);
+                assert(mask[0] == 0);
+            }
+
+            // Test case 7: Scores exactly at threshold (should be considered invalid)
+            {
+                const float scores[] = {0.7f, 0.7f, 0.7f};
+                const float threshold = 0.7f;
+                int mask[3];
+                set_valid_mask(scores, threshold, mask, 3);
+                assert(mask[0] == 0 && mask[1] == 0 && mask[2] == 0);
+            }
+
+            // Test case 8: Large array
+            {
+                const int size = 1000;
+                float scores[size];
+                int mask[size];
+                for (int i = 0; i < size; ++i) {
+                    scores[i] = (i % 2 == 0) ? 0.8f : 0.6f;
+                }
+                const float threshold = 0.7f;
+                set_valid_mask(scores, threshold, mask, size);
+                for (int i = 0; i < size; ++i) {
+                    assert(mask[i] == (i % 2 == 0 ? 1 : 0));
+                }
+            }
+
+            std::cout << "All test cases passed!" << std::endl;
         }
 
         int main() {
-            test_all_above_threshold();
-            test_all_below_threshold();
-            test_mixed_scores();
-            test_empty_array();
-            test_equal_to_threshold();
-            
-            std::cout << "All tests passed successfully!" << std::endl;
+            test_set_valid_mask();
             return 0;
         }

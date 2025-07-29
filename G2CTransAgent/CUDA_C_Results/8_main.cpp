@@ -9,120 +9,117 @@ __global__ void convertKinectDisparityToRegularDisparity_kernel ( float * d_regu
         #include <cstring>
 
         void convertKinectDisparityToRegularDisparity(float* d_regularDisparity, int d_regularDisparityPitch,
-                                                    const float* d_KinectDisparity, int d_KinectDisparityPitch,
-                                                    int width, int height);
+                                             const float* d_KinectDisparity, int d_KinectDisparityPitch,
+                                             int width, int height);
 
         int main() {
-            // Test case 1: Small array with zero and non-zero values
+            // Test case 1: Small 2x2 array with zero and non-zero values
             {
-                const int width = 3;
+                const int width = 2;
                 const int height = 2;
                 const int pitch = width * sizeof(float);
                 
-                float kinectDisparity[height][width] = {
-                    {0.0f, 1.0f, 2.0f},
-                    {3.0f, 0.0f, 4.0f}
-                };
+                float kinectDisparity[width * height] = {0.0f, 1.0f, 2.0f, 0.0f};
+                float regularDisparity[width * height] = {0};
                 
-                float regularDisparity[height][width] = {0};
+                convertKinectDisparityToRegularDisparity(regularDisparity, pitch,
+                                                        kinectDisparity, pitch,
+                                                        width, height);
                 
-                convertKinectDisparityToRegularDisparity(
-                    reinterpret_cast<float*>(regularDisparity), pitch,
-                    reinterpret_cast<const float*>(kinectDisparity), pitch,
-                    width, height);
-                
-                float expected[height][width] = {
-                    {1.0f, -1.0f, -2.0f},
-                    {-3.0f, 1.0f, -4.0f}
-                };
-                
-                assert(memcmp(regularDisparity, expected, sizeof(expected)) == 0);
+                assert(regularDisparity[0] == 1.0f);
+                assert(regularDisparity[1] == -1.0f);
+                assert(regularDisparity[2] == -2.0f);
+                assert(regularDisparity[3] == 1.0f);
             }
 
-            // Test case 2: Single element array with zero value
+            // Test case 2: Larger array with different pitch (extra padding)
             {
-                const int width = 1;
-                const int height = 1;
-                const int pitch = width * sizeof(float);
+                const int width = 3;
+                const int height = 2;
+                const int extraPadding = 1;
+                const int kinectPitch = (width + extraPadding) * sizeof(float);
+                const int regularPitch = (width + extraPadding) * sizeof(float);
                 
-                float kinectDisparity = 0.0f;
-                float regularDisparity = 0.0f;
+                float* kinectDisparity = new float[(width + extraPadding) * height];
+                float* regularDisparity = new float[(width + extraPadding) * height];
                 
-                convertKinectDisparityToRegularDisparity(
-                    &regularDisparity, pitch,
-                    &kinectDisparity, pitch,
-                    width, height);
-                
-                assert(regularDisparity == 1.0f);
-            }
-
-            // Test case 3: Single element array with non-zero value
-            {
-                const int width = 1;
-                const int height = 1;
-                const int pitch = width * sizeof(float);
-                
-                float kinectDisparity = 5.0f;
-                float regularDisparity = 0.0f;
-                
-                convertKinectDisparityToRegularDisparity(
-                    &regularDisparity, pitch,
-                    &kinectDisparity, pitch,
-                    width, height);
-                
-                assert(regularDisparity == -5.0f);
-            }
-
-            // Test case 4: Larger array with pitch larger than width
-            {
-                const int width = 2;
-                const int height = 3;
-                const int extra = 2; // Extra elements to test pitch
-                const int pitch = (width + extra) * sizeof(float);
-                
-                float kinectDisparity[height][width + extra];
-                float regularDisparity[height][width + extra];
-                
-                // Initialize with known pattern
+                // Initialize with test data
                 for (int y = 0; y < height; ++y) {
-                    for (int x = 0; x < width + extra; ++x) {
-                        kinectDisparity[y][x] = (x < width) ? (y * width + x) : -1.0f;
-                        regularDisparity[y][x] = -1.0f;
+                    for (int x = 0; x < width; ++x) {
+                        kinectDisparity[y * (width + extraPadding) + x] = (x + y) * 0.5f;
                     }
+                    // Set one zero value per row
+                    kinectDisparity[y * (width + extraPadding) + 1] = 0.0f;
                 }
-                // Set some zeros
-                kinectDisparity[1][1] = 0.0f;
-                kinectDisparity[2][0] = 0.0f;
                 
-                convertKinectDisparityToRegularDisparity(
-                    reinterpret_cast<float*>(regularDisparity), pitch,
-                    reinterpret_cast<const float*>(kinectDisparity), pitch,
-                    width, height);
+                convertKinectDisparityToRegularDisparity(regularDisparity, regularPitch,
+                                                        kinectDisparity, kinectPitch,
+                                                        width, height);
                 
-                // Verify only the first 'width' elements are processed in each row
+                // Verify results
                 for (int y = 0; y < height; ++y) {
-                    for (int x = 0; x < width + extra; ++x) {
-                        if (x < width) {
-                            float expected = (kinectDisparity[y][x] == 0.0f) ? 1.0f : -kinectDisparity[y][x];
-                            assert(regularDisparity[y][x] == expected);
+                    for (int x = 0; x < width; ++x) {
+                        float expected;
+                        if (x == 1) {
+                            expected = 1.0f;
                         } else {
-                            assert(regularDisparity[y][x] == -1.0f); // Should remain unchanged
+                            expected = -((x + y) * 0.5f);
                         }
+                        assert(regularDisparity[y * (width + extraPadding) + x] == expected);
                     }
+                }
+                
+                delete[] kinectDisparity;
+                delete[] regularDisparity;
+            }
+
+            // Test case 3: All zeros
+            {
+                const int width = 4;
+                const int height = 1;
+                const int pitch = width * sizeof(float);
+                
+                float kinectDisparity[width * height] = {0};
+                float regularDisparity[width * height] = {0};
+                
+                convertKinectDisparityToRegularDisparity(regularDisparity, pitch,
+                                                        kinectDisparity, pitch,
+                                                        width, height);
+                
+                for (int i = 0; i < width * height; ++i) {
+                    assert(regularDisparity[i] == 1.0f);
                 }
             }
 
-            std::cout << "All tests passed successfully!" << std::endl;
+            // Test case 4: All non-zeros
+            {
+                const int width = 1;
+                const int height = 3;
+                const int pitch = width * sizeof(float);
+                
+                float kinectDisparity[width * height] = {0.5f, 1.0f, 1.5f};
+                float regularDisparity[width * height] = {0};
+                
+                convertKinectDisparityToRegularDisparity(regularDisparity, pitch,
+                                                        kinectDisparity, pitch,
+                                                        width, height);
+                
+                assert(regularDisparity[0] == -0.5f);
+                assert(regularDisparity[1] == -1.0f);
+                assert(regularDisparity[2] == -1.5f);
+            }
+
+            std::cout << "All tests passed!" << std::endl;
             return 0;
         }
 
         void convertKinectDisparityToRegularDisparity(float* d_regularDisparity, int d_regularDisparityPitch,
-                                                    const float* d_KinectDisparity, int d_KinectDisparityPitch,
-                                                    int width, int height) {
+                                             const float* d_KinectDisparity, int d_KinectDisparityPitch,
+                                             int width, int height) {
             for (int y = 0; y < height; ++y) {
                 for (int x = 0; x < width; ++x) {
                     float d_in = *((float*)((char*)d_KinectDisparity + y * d_KinectDisparityPitch) + x);
-                    float d_out = (d_in == 0.0f) ? 1.0f : -d_in;
+                    float d_out = (d_in == 0.0f) ? 1 : -d_in;
                     *((float*)((char*)d_regularDisparity + y * d_regularDisparityPitch) + x) = d_out;
                 }
             }

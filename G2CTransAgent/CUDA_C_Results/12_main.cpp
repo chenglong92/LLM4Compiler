@@ -5,71 +5,77 @@ __global__ void testInt1 ( const int * input , int dims ) { int tid = blockIdx .
 // optimized code: 
 
 #include <iostream>
-#include <cstdlib>
+        #include <cassert>
 
-void testInt1(const int* input, int dims) {
-    // Simulate thread behavior with a loop
-    for (int tid = 0; tid < dims; tid++) {
-        int sum = 0;  // Initialize sum to 0 for each "thread"
-        for (int i = 0; i < 3000 * 4; i++) {
-            if (input[i] == 0) {
-                sum++;
+        void testInt1(const int* input, int dims);
+
+        int main() {
+            // Test case 1: All zeros
+            {
+                const int size = 3000 * 4;
+                int input[size];
+                for (int i = 0; i < size; ++i) {
+                    input[i] = 0;
+                }
+                testInt1(input, 5);
+                std::cout << "Test case 1 passed: All zeros" << std::endl;
+            }
+
+            // Test case 2: No zeros
+            {
+                const int size = 3000 * 4;
+                int input[size];
+                for (int i = 0; i < size; ++i) {
+                    input[i] = 1;
+                }
+                testInt1(input, 3);
+                std::cout << "Test case 2 passed: No zeros" << std::endl;
+            }
+
+            // Test case 3: Mixed zeros and non-zeros
+            {
+                const int size = 3000 * 4;
+                int input[size];
+                for (int i = 0; i < size; ++i) {
+                    input[i] = (i % 2 == 0) ? 0 : 1;
+                }
+                testInt1(input, 2);
+                std::cout << "Test case 3 passed: Mixed zeros and non-zeros" << std::endl;
+            }
+
+            // Test case 4: Single iteration (dims = 1)
+            {
+                const int size = 3000 * 4;
+                int input[size];
+                for (int i = 0; i < size; ++i) {
+                    input[i] = (i % 3 == 0) ? 0 : 1;
+                }
+                testInt1(input, 1);
+                std::cout << "Test case 4 passed: Single iteration" << std::endl;
+            }
+
+            // Test case 5: Empty iteration (dims = 0)
+            {
+                const int size = 3000 * 4;
+                int input[size];
+                for (int i = 0; i < size; ++i) {
+                    input[i] = i;
+                }
+                testInt1(input, 0);
+                std::cout << "Test case 5 passed: Empty iteration" << std::endl;
+            }
+
+            return 0;
+        }
+
+        void testInt1(const int* input, int dims) {
+            for (int tid = 0; tid < dims; ++tid) {
+                int sum = 0;
+                for (int i = 0; i < 3000 * 4; ++i) {
+                    if (input[i] == 0) {
+                        sum++;
+                    }
+                }
+                // sum is unused in original code
             }
         }
-        // sum is unused, just like in the original kernel
-    }
-}
-
-int main() {
-    // Test case 1: Empty array
-    {
-        int* emptyArray = nullptr;
-        testInt1(emptyArray, 0);
-        std::cout << "Test case 1 passed (empty array)" << std::endl;
-    }
-
-    // Test case 2: Small array with some zeros
-    {
-        int smallArray[10] = {0, 1, 0, 2, 3, 0, 4, 5, 0, 6};
-        testInt1(smallArray, 3);
-        std::cout << "Test case 2 passed (small array with zeros)" << std::endl;
-    }
-
-    // Test case 3: Large array with no zeros
-    {
-        const int size = 12000;
-        int* noZeroArray = new int[size];
-        for (int i = 0; i < size; i++) {
-            noZeroArray[i] = 1;
-        }
-        testInt1(noZeroArray, 5);
-        delete[] noZeroArray;
-        std::cout << "Test case 3 passed (large array with no zeros)" << std::endl;
-    }
-
-    // Test case 4: Array with exactly 12000 elements
-    {
-        const int size = 12000;
-        int* exactSizeArray = new int[size];
-        for (int i = 0; i < size; i++) {
-            exactSizeArray[i] = (i % 5 == 0) ? 0 : 1; // 20% zeros
-        }
-        testInt1(exactSizeArray, 10);
-        delete[] exactSizeArray;
-        std::cout << "Test case 4 passed (exactly 12000 elements)" << std::endl;
-    }
-
-    // Test case 5: Array with more than 12000 elements
-    {
-        const int size = 15000;
-        int* largeArray = new int[size];
-        for (int i = 0; i < size; i++) {
-            largeArray[i] = (i % 10 == 0) ? 0 : 1; // 10% zeros
-        }
-        testInt1(largeArray, 8);
-        delete[] largeArray;
-        std::cout << "Test case 5 passed (more than 12000 elements)" << std::endl;
-    }
-
-    return 0;
-}

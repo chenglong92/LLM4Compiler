@@ -12,69 +12,54 @@ __global__ void delay_kernel ( int * N_mobil , int * Tau , int dia ) { int N = N
         int main() {
             // Test case 1: All positive Tau values
             {
-                int N = 5;
+                int N = 3;
                 int N_mobil[1] = {N};
-                int Tau[] = {3, 5, 2, 1, 4};
-                int expected[] = {2, 4, 1, 0, 3};
-                
+                int Tau[3] = {5, 3, 1};
                 delay_kernel(N_mobil, Tau, 0);
-                
-                for (int i = 0; i < N; ++i) {
-                    assert(Tau[i] == expected[i]);
-                }
+                assert(Tau[0] == 4);
+                assert(Tau[1] == 2);
+                assert(Tau[2] == 0);
             }
 
-            // Test case 2: Mixed positive, zero and negative Tau values
-            {
-                int N = 6;
-                int N_mobil[1] = {N};
-                int Tau[] = {0, -1, 3, -2, 1, 0};
-                int expected[] = {0, -1, 2, -2, 0, 0};
-                
-                delay_kernel(N_mobil, Tau, 0);
-                
-                for (int i = 0; i < N; ++i) {
-                    assert(Tau[i] == expected[i]);
-                }
-            }
-
-            // Test case 3: Empty array (N = 0)
-            {
-                int N = 0;
-                int N_mobil[1] = {N};
-                int Tau[] = {1, 2, 3};  // Shouldn't be accessed
-                
-                delay_kernel(N_mobil, Tau, 0);
-                
-                // No assertions needed as function shouldn't modify anything
-            }
-
-            // Test case 4: All zero Tau values
+            // Test case 2: Mixed positive and non-positive Tau values
             {
                 int N = 4;
                 int N_mobil[1] = {N};
-                int Tau[] = {0, 0, 0, 0};
-                int expected[] = {0, 0, 0, 0};
-                
+                int Tau[4] = {2, 0, -1, 3};
                 delay_kernel(N_mobil, Tau, 0);
-                
-                for (int i = 0; i < N; ++i) {
-                    assert(Tau[i] == expected[i]);
-                }
+                assert(Tau[0] == 1);
+                assert(Tau[1] == 0);
+                assert(Tau[2] == -1);
+                assert(Tau[3] == 2);
             }
 
-            // Test case 5: All negative Tau values
+            // Test case 3: Empty array (N=0)
+            {
+                int N = 0;
+                int N_mobil[1] = {N};
+                int Tau[1] = {5};  // Content shouldn't matter
+                delay_kernel(N_mobil, Tau, 0);
+                assert(Tau[0] == 5);  // Should remain unchanged
+            }
+
+            // Test case 4: All non-positive Tau values
             {
                 int N = 3;
                 int N_mobil[1] = {N};
-                int Tau[] = {-1, -5, -3};
-                int expected[] = {-1, -5, -3};
-                
+                int Tau[3] = {0, -2, -5};
                 delay_kernel(N_mobil, Tau, 0);
-                
-                for (int i = 0; i < N; ++i) {
-                    assert(Tau[i] == expected[i]);
-                }
+                assert(Tau[0] == 0);
+                assert(Tau[1] == -2);
+                assert(Tau[2] == -5);
+            }
+
+            // Test case 5: Single element array
+            {
+                int N = 1;
+                int N_mobil[1] = {N};
+                int Tau[1] = {10};
+                delay_kernel(N_mobil, Tau, 0);
+                assert(Tau[0] == 9);
             }
 
             std::cout << "All test cases passed!" << std::endl;

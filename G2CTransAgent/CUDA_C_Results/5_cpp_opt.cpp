@@ -1,11 +1,10 @@
 // Optimized code(id = 5): 
 
-void Kernel_Sum_backward_opt2(float* db, float* sum, int r_sum, int c) {
-            for (int j = 0; j < c; ++j) {
-                float temp = 0;
-                for (int i = 0; i < r_sum; ++i) {
-                    temp += sum[i * c + j];
-                }
-                db[j] = temp;
-            }
+void delay_kernel(int* N_mobil, int* Tau, int dia) {
+    int N = N_mobil[0];
+    for (int id = 0; id < N; ++id) {
+        if (Tau[id] > 0) {
+            Tau[id] = Tau[id] - 1;
         }
+    }
+}

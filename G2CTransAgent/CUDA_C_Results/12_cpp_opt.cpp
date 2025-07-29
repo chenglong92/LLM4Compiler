@@ -1,10 +1,13 @@
 // Optimized code(id = 12): 
 
-void resetHeap(int* heap, int* heapPtr, int numBlock) {
-    for (int index = 0; index < numBlock; ++index) {
-        if (index == 0) {
-            heapPtr[0] = numBlock - 1;
+void testInt1(const int* input, int dims) {
+            for (int tid = 0; tid < dims; ++tid) {
+                int sum = 0;
+                for (int i = 0; i < 3000 * 4; ++i) {
+                    if (input[i] == 0) {
+                        sum++;
+                    }
+                }
+                // sum is unused in original code
+            }
         }
-        heap[index] = numBlock - index - 1;
-    }
-}

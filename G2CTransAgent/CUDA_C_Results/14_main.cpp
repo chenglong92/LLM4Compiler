@@ -15,97 +15,73 @@ __global__ void copy_swap ( float * f_in , float * f_target , const int L_x ) { 
             }
         }
 
-        void print_array(float* arr, int size) {
-            for (int i = 0; i < size; ++i) {
-                std::cout << arr[i] << " ";
-            }
-            std::cout << std::endl;
-        }
-
-        bool arrays_equal(float* a, float* b, int size) {
-            for (int i = 0; i < size; ++i) {
-                if (a[i] != b[i]) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        void test_copy_swap() {
-            // Test case 1: Normal case with multiple elements
+        int main() {
+            // Test case 1: Swap arrays of size 3
             {
-                float arr1[] = {1.1f, 2.2f, 3.3f};
-                float arr2[] = {4.4f, 5.5f, 6.6f};
-                float expected1[] = {4.4f, 5.5f, 6.6f};
-                float expected2[] = {1.1f, 2.2f, 3.3f};
+                float arr1[] = {1.0f, 2.0f, 3.0f};
+                float arr2[] = {4.0f, 5.0f, 6.0f};
                 const int size = 3;
                 
                 copy_swap(arr1, arr2, size);
                 
-                assert(arrays_equal(arr1, expected1, size));
-                assert(arrays_equal(arr2, expected2, size));
+                assert(arr1[0] == 4.0f && arr1[1] == 5.0f && arr1[2] == 6.0f);
+                assert(arr2[0] == 1.0f && arr2[1] == 2.0f && arr2[2] == 3.0f);
             }
 
-            // Test case 2: Empty arrays (L_x = 0)
+            // Test case 2: Swap empty arrays
             {
-                float arr1[] = {1.0f, 2.0f};
-                float arr2[] = {3.0f, 4.0f};
-                float original1[] = {1.0f, 2.0f};
-                float original2[] = {3.0f, 4.0f};
+                float arr1[] = {};
+                float arr2[] = {};
                 const int size = 0;
                 
                 copy_swap(arr1, arr2, size);
                 
-                assert(arrays_equal(arr1, original1, 2));
-                assert(arrays_equal(arr2, original2, 2));
+                // No elements to verify, just ensure no crash
             }
 
-            // Test case 3: Single element arrays
+            // Test case 3: Swap single-element arrays
             {
                 float arr1[] = {10.5f};
                 float arr2[] = {20.5f};
-                float expected1[] = {20.5f};
-                float expected2[] = {10.5f};
                 const int size = 1;
                 
                 copy_swap(arr1, arr2, size);
                 
-                assert(arrays_equal(arr1, expected1, size));
-                assert(arrays_equal(arr2, expected2, size));
+                assert(arr1[0] == 20.5f);
+                assert(arr2[0] == 10.5f);
             }
 
-            // Test case 4: Arrays with same values
+            // Test case 4: Swap arrays with negative and positive values
             {
-                float arr1[] = {5.0f, 5.0f};
-                float arr2[] = {5.0f, 5.0f};
-                float expected1[] = {5.0f, 5.0f};
-                float expected2[] = {5.0f, 5.0f};
-                const int size = 2;
+                float arr1[] = {-1.0f, -2.0f, -3.0f};
+                float arr2[] = {1.0f, 2.0f, 3.0f};
+                const int size = 3;
                 
                 copy_swap(arr1, arr2, size);
                 
-                assert(arrays_equal(arr1, expected1, size));
-                assert(arrays_equal(arr2, expected2, size));
+                assert(arr1[0] == 1.0f && arr1[1] == 2.0f && arr1[2] == 3.0f);
+                assert(arr2[0] == -1.0f && arr2[1] == -2.0f && arr2[2] == -3.0f);
             }
 
-            // Test case 5: Partial swap (L_x less than array size)
+            // Test case 5: Swap large arrays
             {
-                float arr1[] = {1.0f, 2.0f, 3.0f, 4.0f};
-                float arr2[] = {5.0f, 6.0f, 7.0f, 8.0f};
-                float expected1[] = {5.0f, 6.0f, 3.0f, 4.0f};
-                float expected2[] = {1.0f, 2.0f, 7.0f, 8.0f};
-                const int size = 2;
+                const int size = 1000;
+                float arr1[size];
+                float arr2[size];
+                
+                for (int i = 0; i < size; ++i) {
+                    arr1[i] = static_cast<float>(i);
+                    arr2[i] = static_cast<float>(size - i);
+                }
                 
                 copy_swap(arr1, arr2, size);
                 
-                assert(arrays_equal(arr1, expected1, 4));
-                assert(arrays_equal(arr2, expected2, 4));
+                for (int i = 0; i < size; ++i) {
+                    assert(arr1[i] == static_cast<float>(size - i));
+                    assert(arr2[i] == static_cast<float>(i));
+                }
             }
 
             std::cout << "All test cases passed!" << std::endl;
-        }
-
-        int main() {
-            test_copy_swap();
             return 0;
         }

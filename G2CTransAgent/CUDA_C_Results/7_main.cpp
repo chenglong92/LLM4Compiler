@@ -15,76 +15,77 @@ __global__ void incKernel ( int * g_out , int * g_in , int N , int inner_reps ) 
             }
         }
 
-        void test_incKernel() {
-            // Test case 1: Basic functionality
+        int main() {
+            // Test case 1: Single element, single inner repetition
             {
-                const int N = 5;
-                const int inner_reps = 3;
-                int g_in[N] = {1, 2, 3, 4, 5};
-                int g_out[N] = {0};
-
+                int g_in[] = {5};
+                int g_out[1] = {0};
+                int N = 1;
+                int inner_reps = 1;
                 incKernel(g_out, g_in, N, inner_reps);
+                assert(g_out[0] == 6);
+            }
 
+            // Test case 2: Multiple elements, single inner repetition
+            {
+                int g_in[] = {1, 2, 3, 4, 5};
+                int g_out[5] = {0};
+                int N = 5;
+                int inner_reps = 1;
+                incKernel(g_out, g_in, N, inner_reps);
                 for (int i = 0; i < N; ++i) {
                     assert(g_out[i] == g_in[i] + 1);
                 }
             }
 
-            // Test case 2: Empty array (N = 0)
+            // Test case 3: Single element, multiple inner repetitions
             {
-                const int N = 0;
-                const int inner_reps = 10;
-                int* g_in = nullptr;
-                int* g_out = nullptr;
-
+                int g_in[] = {10};
+                int g_out[1] = {0};
+                int N = 1;
+                int inner_reps = 100;
                 incKernel(g_out, g_in, N, inner_reps);
-                // No assertion needed as function should handle N=0 gracefully
+                assert(g_out[0] == 11);
             }
 
-            // Test case 3: Single element array
+            // Test case 4: Multiple elements, multiple inner repetitions
             {
-                const int N = 1;
-                const int inner_reps = 1;
-                int g_in[N] = {42};
-                int g_out[N] = {0};
-
+                int g_in[] = {10, 20, 30, 40, 50};
+                int g_out[5] = {0};
+                int N = 5;
+                int inner_reps = 100;
                 incKernel(g_out, g_in, N, inner_reps);
-
-                assert(g_out[0] == g_in[0] + 1);
-            }
-
-            // Test case 4: Multiple inner repetitions
-            {
-                const int N = 3;
-                const int inner_reps = 100;
-                int g_in[N] = {10, 20, 30};
-                int g_out[N] = {0};
-
-                incKernel(g_out, g_in, N, inner_reps);
-
                 for (int i = 0; i < N; ++i) {
                     assert(g_out[i] == g_in[i] + 1);
                 }
             }
 
-            // Test case 5: Zero inner repetitions
+            // Test case 5: Empty array (N = 0)
             {
-                const int N = 4;
-                const int inner_reps = 0;
-                int g_in[N] = {1, 2, 3, 4};
-                int g_out[N] = {0};
-
+                int g_in[] = {1, 2, 3};
+                int g_out[3] = {0};
+                int N = 0;
+                int inner_reps = 10;
                 incKernel(g_out, g_in, N, inner_reps);
+                // No operation should be performed, g_out remains unchanged
+                for (int i = 0; i < 3; ++i) {
+                    assert(g_out[i] == 0);
+                }
+            }
 
-                // Output should remain unchanged since inner loop doesn't execute
+            // Test case 6: Zero inner repetitions
+            {
+                int g_in[] = {7, 8, 9};
+                int g_out[3] = {0};
+                int N = 3;
+                int inner_reps = 0;
+                incKernel(g_out, g_in, N, inner_reps);
+                // No operation should be performed, g_out remains unchanged
                 for (int i = 0; i < N; ++i) {
                     assert(g_out[i] == 0);
                 }
             }
-        }
 
-        int main() {
-            test_incKernel();
-            std::cout << "All tests passed successfully!" << std::endl;
+            std::cout << "All test cases passed!" << std::endl;
             return 0;
         }

@@ -1,11 +1,11 @@
 // Optimized code(id = 2): 
 
-void set_valid_mask(const float* score, float score_thr, int* valid_mask, int dims) {
-            for (int tid = 0; tid < dims; ++tid) {
-                if (score[tid] > score_thr) {
-                    valid_mask[tid] = 1;
+void boundaryCorrectIndexes(int* d_in, int* d_out, int length, int N) {
+            for (int tid = 0; tid < length; ++tid) {
+                if (d_in[tid] > N) {
+                    d_out[tid] = N;
                 } else {
-                    valid_mask[tid] = 0;
+                    d_out[tid] = d_in[tid];
                 }
             }
         }

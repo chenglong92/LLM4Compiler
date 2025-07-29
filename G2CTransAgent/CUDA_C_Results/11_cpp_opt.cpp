@@ -1,14 +1,10 @@
 // Optimized code(id = 11): 
 
-void testInt1(const int* input, int dims) {
-    // Simulate thread behavior with a loop
-    for (int tid = 0; tid < dims; tid++) {
-        int sum = 0;  // Initialize sum to 0 for each "thread"
-        for (int i = 0; i < 3000 * 4; i++) {
-            if (input[i] == 0) {
-                sum++;
-            }
+void is_repeat(int N, int* device_input, int* device_output) {
+    for (int idx = 0; idx < N; ++idx) {
+        device_output[idx] = 0;
+        if (idx + 1 < N && device_input[idx] == device_input[idx + 1]) {
+            device_output[idx] = 1;
         }
-        // sum is unused, just like in the original kernel
     }
 }

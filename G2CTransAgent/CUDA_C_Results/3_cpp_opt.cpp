@@ -1,11 +1,11 @@
 // Optimized code(id = 3): 
 
-void vectorMatrixMult(long int totalPixels, int availablePixels, int outPixelOffset, float* matrix, float* vector, float* out) {
-    for (long int i = 0; i < availablePixels; ++i) {
-        float sum = 0.0;
-        for (long int j = 0; j < totalPixels; ++j) {
-            sum += matrix[i * totalPixels + j] * vector[j];
+void set_valid_mask(const float* score, float score_thr, int* valid_mask, int dims) {
+            for (int tid = 0; tid < dims; ++tid) {
+                if (score[tid] > score_thr) {
+                    valid_mask[tid] = 1;
+                } else {
+                    valid_mask[tid] = 0;
+                }
+            }
         }
-        out[i + outPixelOffset] = sum;
-    }
-}

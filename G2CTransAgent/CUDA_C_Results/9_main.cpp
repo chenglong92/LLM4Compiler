@@ -14,81 +14,121 @@ void doubleArrayScalarDivide(double* d_in, int* d_out, int length, double scalar
 }
 
 int main() {
-    // Test case 1: Normal case with positive scalar
+    // Test case 1: Normal case with positive values
     {
-        double input1[] = {10.0, 20.0, 30.0, 40.0};
+        double input1[] = {10.5, 20.25, 30.75, 40.0};
         int output1[4];
-        double scalar1 = 2.0;
+        double scalar1 = 2.5;
+        int expected1[] = {4, 8, 12, 16};
+        
         doubleArrayScalarDivide(input1, output1, 4, scalar1);
-        assert(output1[0] == 5);
-        assert(output1[1] == 10);
-        assert(output1[2] == 15);
-        assert(output1[3] == 20);
+        
+        for (int i = 0; i < 4; ++i) {
+            assert(output1[i] == expected1[i]);
+        }
     }
 
-    // Test case 2: Normal case with negative scalar
+    // Test case 2: Normal case with negative values
     {
-        double input2[] = {10.0, 20.0, 30.0, 40.0};
+        double input2[] = {-10.5, -20.25, -30.75, -40.0};
         int output2[4];
-        double scalar2 = -2.0;
+        double scalar2 = 2.5;
+        int expected2[] = {-4, -8, -12, -16};
+        
         doubleArrayScalarDivide(input2, output2, 4, scalar2);
-        assert(output2[0] == -5);
-        assert(output2[1] == -10);
-        assert(output2[2] == -15);
-        assert(output2[3] == -20);
+        
+        for (int i = 0; i < 4; ++i) {
+            assert(output2[i] == expected2[i]);
+        }
     }
 
-    // Test case 3: Scalar is zero (division by zero, undefined behavior expected)
+    // Test case 3: Mixed positive and negative values
     {
-        double input3[] = {10.0, 20.0, 30.0, 40.0};
+        double input3[] = {10.5, -20.25, 30.75, -40.0};
         int output3[4];
-        double scalar3 = 0.0;
-        // Note: This will cause undefined behavior, but we include it as an edge case
+        double scalar3 = 2.5;
+        int expected3[] = {4, -8, 12, -16};
+        
         doubleArrayScalarDivide(input3, output3, 4, scalar3);
+        
+        for (int i = 0; i < 4; ++i) {
+            assert(output3[i] == expected3[i]);
+        }
     }
 
-    // Test case 4: Empty array
+    // Test case 4: Scalar is 1.0 (identity operation)
     {
-        double input4[] = {};
-        int output4[0];
-        double scalar4 = 2.0;
-        doubleArrayScalarDivide(input4, output4, 0, scalar4);
+        double input4[] = {1.1, 2.2, 3.3, 4.4};
+        int output4[4];
+        double scalar4 = 1.0;
+        int expected4[] = {1, 2, 3, 4};
+        
+        doubleArrayScalarDivide(input4, output4, 4, scalar4);
+        
+        for (int i = 0; i < 4; ++i) {
+            assert(output4[i] == expected4[i]);
+        }
     }
 
-    // Test case 5: Scalar is very small
+    // Test case 5: Scalar is negative
     {
-        double input5[] = {1.0, 2.0, 3.0, 4.0};
+        double input5[] = {10.5, 20.25, 30.75, 40.0};
         int output5[4];
-        double scalar5 = 1e-10;
+        double scalar5 = -2.5;
+        int expected5[] = {-4, -8, -12, -16};
+        
         doubleArrayScalarDivide(input5, output5, 4, scalar5);
-        assert(output5[0] == static_cast<int>(1.0 / scalar5));
-        assert(output5[1] == static_cast<int>(2.0 / scalar5));
-        assert(output5[2] == static_cast<int>(3.0 / scalar5));
-        assert(output5[3] == static_cast<int>(4.0 / scalar5));
+        
+        for (int i = 0; i < 4; ++i) {
+            assert(output5[i] == expected5[i]);
+        }
     }
 
-    // Test case 6: Scalar is very large
+    // Test case 6: Scalar is zero (division by zero - undefined behavior, but should compile)
     {
-        double input6[] = {1.0, 2.0, 3.0, 4.0};
+        double input6[] = {10.5, 20.25, 30.75, 40.0};
         int output6[4];
-        double scalar6 = 1e10;
+        double scalar6 = 0.0;
+        
+        // Note: This will cause undefined behavior, but we're just testing compilation
         doubleArrayScalarDivide(input6, output6, 4, scalar6);
-        assert(output6[0] == 0);
-        assert(output6[1] == 0);
-        assert(output6[2] == 0);
-        assert(output6[3] == 0);
     }
 
-    // Test case 7: Mixed positive and negative input values
+    // Test case 7: Empty array
     {
-        double input7[] = {-10.0, 20.0, -30.0, 40.0};
-        int output7[4];
-        double scalar7 = 2.0;
-        doubleArrayScalarDivide(input7, output7, 4, scalar7);
-        assert(output7[0] == -5);
-        assert(output7[1] == 10);
-        assert(output7[2] == -15);
-        assert(output7[3] == 20);
+        double input7[] = {};
+        int output7[0];
+        double scalar7 = 2.5;
+        
+        doubleArrayScalarDivide(input7, output7, 0, scalar7);
+    }
+
+    // Test case 8: Large values
+    {
+        double input8[] = {1e20, 2e20, 3e20};
+        int output8[3];
+        double scalar8 = 1e19;
+        int expected8[] = {10, 20, 30};
+        
+        doubleArrayScalarDivide(input8, output8, 3, scalar8);
+        
+        for (int i = 0; i < 3; ++i) {
+            assert(output8[i] == expected8[i]);
+        }
+    }
+
+    // Test case 9: Small values
+    {
+        double input9[] = {1e-20, 2e-20, 3e-20};
+        int output9[3];
+        double scalar9 = 1e-19;
+        int expected9[] = {0, 0, 0}; // Results will be 0.1, 0.2, 0.3 which cast to 0
+        
+        doubleArrayScalarDivide(input9, output9, 3, scalar9);
+        
+        for (int i = 0; i < 3; ++i) {
+            assert(output9[i] == expected9[i]);
+        }
     }
 
     std::cout << "All test cases passed!" << std::endl;
