@@ -6,6 +6,8 @@ import Format_Agent as FA
 import subprocess
 import glob
 import re
+import pandas as pd
+import numpy as np
 
 def readdata(filename):
     data_list = []
@@ -81,19 +83,6 @@ def formal_verification(scr_name, tar_name):
     result = subprocess.run(alive_tv_cmd, capture_output = True, text = True, check = True)
     return result.stdout
 
-def extract_function_name_v1(code):
-    pattern = r'\b([a-zA-Z_][a-zA-Z0-9]*)\s*\([^)]*\)\s*{'
-
-    matches = re.finditer(pattern, code)
-
-    for match in matches:
-        preceding_text = code[:match.start(1)].strip()
-
-        if not preceding_text or re.search(r'\b(int|float|void|double|char|long|short|unsigned|const|static)\s*$', preceding_text):
-            return match.group(1)
-
-    return None
-
 def extract_function_name(code):
     pattern = r'''
         (?:[\w\s\*&const]+?\s+)
@@ -109,13 +98,16 @@ def extract_function_name(code):
     return None
 
 def replace_name(code):
-    # 使用str.replace()方法进行替换，该方法会替换所有出现的子字符串
     return code.replace("A_name", "b_name")
 
 def formalverify(src_name, tar_name):
     alive_tv_cmd = ["alive-tv", src_name, tar_name]
     res = subprocess.run(alive_tv_cmd, capture_output = True, text = True, check = True)
     return res.stdout
+
+def save_array_to_excel(array, filename):
+    df = pd.DataFrame(array)
+    df.to_excel(f"{filename}.xlsx", index=False, header=False)
 
 def semantic_verification():
     filename = "BabelTower/test/mono_cases.jsonl"
@@ -125,6 +117,9 @@ def semantic_verification():
     fileverify = "formalverification.log"
     CorrectVeriCount = 0
     FailCount = 0
+    filename_results = "formalVresults"
+    verifysummary = np.zeros((num_rows, 2))
+    verifysummary[:, 0] = np.arange(num_rows)
     for i in range(num_rows):
         print(f"============i: {i} ================")
         filename_opt = os.path.join(filepath, f"{i}_cpp_opt.cpp")
@@ -162,12 +157,18 @@ def semantic_verification():
                 f.write(f"===========i: {i}=======\n{verires}\n\n")
             if "1 correct transformations" in verires:
                 CorrectVeriCount += 1
+                verifysummary[i, 1] = 1
+            else:
+                verifysummary[i, 1] = -1
         except:
-            print(f"i = {i} error: jump to next one!")
+            print(f"i: {i} Failed due to compilation or alive2 verification, jump to the next!")
             FailCount += 1
+            continue
         print("=========================Transformation Summary=============")
         print(f"Correct Formal: {CorrectVeriCount}/{num_rows}")
-        print(f"Failed to Launch LLM: {FailCount} / {num_rows}")
+        print(f"Failed Formal: {FailCount}/{num_rows}")
+    save_array_to_excel(verifysummary, filename_results)
+
 
 if __name__ == "__main__":
     #LaunchTrans()
