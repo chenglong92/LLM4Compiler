@@ -42,7 +42,21 @@ def build_format_agent(sys_prompt: str = None):
         OPTIMIZATION_PROMPT = PromptTemplate.from_template(sys_prompt)
     else:
         sys_prompt = """
-        you are a software engineer. you are assigned a simple task: replace the function name of the given cpp program with a new function name - {text}. the requirements include:
+        you are a software engineer. you are assigned a simple task: replace the function name of the given cpp program with the new name, {text}. For example, the given cpp is 
+        ```cpp
+        void funcname(int x) {{
+        int y;
+        y = x;
+        }}
+        ```
+        After replacing the function name, the final output function is:
+        ```cpp
+        void {text}(int x) {{
+        int y;
+        y = x;
+        }}
+        ```
+        Overall, the task requirements include:
         1. just replace the function name, do not change other code samples;
         2. the final optimized llm output must be fully c++ code without any other explanatory samples.
         The original function/program:

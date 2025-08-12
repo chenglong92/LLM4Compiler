@@ -6,6 +6,7 @@ import re
 import os
 import httpx
 import Global_vars as GV
+import asyncio
 
 http_client = httpx.Client(verify=False)
 
@@ -126,7 +127,15 @@ class TriTransformAgent:
     def __init__(self, sys_prompt: str = None):
         self.chain = build_tritransform_agent(sys_prompt)
 
+    async def stream_response(self, input_code: str = None):
+        res = ""
+        async for chunk in self.chain.astream(input_code):
+            print(chunk, end="|", flush=True)
+            res += chunk
+        return res
+
     def run(self, input_code: str) -> str:
+        #return asyncio.run(self.stream_response(input_code))
         return self.chain.invoke(input_code)
 
 # 5. usecases
