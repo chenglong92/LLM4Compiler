@@ -120,7 +120,7 @@ def tool_gen_unit_test(src_code: str, trans_code: str, test_code: str, gen_feedb
     raise Exception(f"LLM UT generation failed for {err_message}")
 
 def tool_execute_test_code(test_code: str):
-    test_code_name = "UT_code.cpp"
+    test_code_name = "UT_test.cpp"
     clang_path = os.getenv("CLANG_PATH", "clang++")
     if "clang" in clang_path:
         compile_cmd = [
@@ -152,11 +152,6 @@ def tool_execute_test_code(test_code: str):
         return result.stdout
     except subprocess.CalledProcessError as e:
         return f"test execution failed: {e.stderr}"
-    finally:
-        if os.path.exists("test_code.cpp"):
-            os.remove("test_code.cpp")
-        if os.path.exists("test_program"):
-            os.remove("test_program")
 
 if __name__ == "__main__":
     filename = "test_code.cpp"

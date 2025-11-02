@@ -47,21 +47,21 @@ def few_shots_prompt(nums: int = 3) -> FewShotChatMessagePromptTemplate:
 def get_LLM_gen_prompt() -> ChatPromptTemplate:
     few_shots = few_shots_prompt()
     system_message = """
-You are an expert in translating CUDA kernels into serial C++ code.  
-Please follow these steps:
-1. Study the provided GPU CUDA function to C++ function on CPU few-shots examples to infer translation patterns.  
-2. Analyze the given CUDA kernel for grid, block and thread parallel semantics.
-3. Generate semantically-equivalent, syntax-correct serial C++ code.  
-4. Review the generated C++ and self-correct if necessary.
-5. keep the generated C++ code able to be compiled separately by adding necessary headers.
-6. keep the function input variables consistent for the two codes(CUDA and C++).
-
-Output **only** a valid JSON object with the following fields:
-{{
-  "trans_code": "<pure C++ function code, no main, no markdown fences>",
-  "analysis": "<brief summary of translation highlights>"
-}}
-"""
+    You are an expert in translating CUDA kernels into serial C++ code.  
+    Please follow these steps:
+    1. Study the provided GPU CUDA function to C++ function on CPU few-shots examples to infer translation patterns.  
+    2. Analyze the given CUDA kernel for grid, block and thread parallel semantics.
+    3. Generate semantically-equivalent, syntax-correct serial C++ code.  
+    4. Review the generated C++ and self-correct if necessary.
+    5. keep the generated C++ code able to be compiled separately by adding necessary headers.
+    6. keep the function input variables consistent for the two codes(CUDA and C++).
+    
+    Output **only** a valid JSON object with the following fields:
+    {{
+      "trans_code": "<pure C++ function code, no main, no markdown fences>",
+      "analysis": "<brief summary of translation highlights>"
+    }}
+    """
     
     human_message = """
     CUDA Kernel: {src_code}

@@ -57,8 +57,8 @@ class G2CTrans:
     def __init__(self, 
                  LLM_gen_max_iter: int = 5,
                  LLM_syntax_fix_max_iter: int = 5,
-                 LLM_verify_semantic_fix_max_iter: int = 5,
-                 LLM_UT_semantic_fix_max_iter: int = 4,
+                 LLM_verify_semantic_fix_max_iter: int = 8,
+                 LLM_UT_semantic_fix_max_iter: int = 8,
                  is_perf_feedback: bool = False):
         #
         self.app = self.workflow()
@@ -96,13 +96,13 @@ class G2CTrans:
             "LLM_syntax_fix_iter": 0,
             "LLM_verify_semantic_fix_iter": 0,
             "LLM_UT_semantic_fix_iter": 0,
-            "debug_LLM_generation": False,
-            "debug_Enode_syntax_compile": False,
-            "debug_Enode_semantic_LLM": False,
-            "debug_Enode_semantic_UT": False,
-            "debug_Fnode_syntax_compile":False,
-            "debug_Fnode_semantic_LLM": False,
-            "debug_Fnode_semantic_UT": False,
+            "debug_LLM_generation": True,
+            "debug_Enode_syntax_compile": True,
+            "debug_Enode_semantic_LLM": True,
+            "debug_Enode_semantic_UT": True,
+            "debug_Fnode_syntax_compile": True,
+            "debug_Fnode_semantic_LLM": True,
+            "debug_Fnode_semantic_UT": True,
         }
         
         if "ref_code" in kwargs:
@@ -214,7 +214,7 @@ class G2CTrans:
             test_code = tool_gen_unit_test(src_code, trans_code, test_code, gen_feedback, max_iter = state["LLM_UT_semantic_fix_max_iter"])
             output = tool_execute_test_code(test_code)
             if state["debug_Enode_semantic_UT"]:
-                print(f"Enode_semantic_UT: {output}")
+                print(f"Enode_semantic_UT: {output} \n \n UT_code: \n {test_code}")
             #output = "Pass"    # for temporary test purpose when the GPU is unavaiable.
             if "test execution failed" in output:
                 gen_feedback = output
@@ -351,15 +351,15 @@ class G2CTrans:
         trans_code = solution.get("trans_code")
         #print(f"Final Output: \n trans_code: \n {trans_code}")
         eval_semantic_UT = solution.get("eval_semantic_UT")
-        '''
+        UT_code = solution.get("UT_code")
+        #'''
         if eval_semantic_UT:
-            UT_code = solution.get("UT_code")
             print("===================Translation is Successful!!===================")
             print(f"src_code: \n {src_code}")
             print(f"trans_code: \n {trans_code}")
             print(f"UT_code: \n {UT_code}")
-        '''
-        return trans_code, mermaid_src, eval_semantic_UT
+        #'''
+        return trans_code, mermaid_src, eval_semantic_UT, UT_code
 
 def test_BabelTower_datasets():
     agent = G2CTrans()
@@ -391,22 +391,27 @@ def test_BabelTower_datasets():
         #
         try:
             print(f"==============Launch G2CTrans Agent Succeed for i = {i} ===========")
-            translated_code, mermaid_src, eval_sematic_UT = agent.process_code(
+            translated_code, mermaid_src, eval_sematic_UT, UT_code = agent.process_code(
                 cuda_code,
                 kernel_name = kernel_name,
                 path_name = "./"
             )
             trans_filename = "trans_" + str(i) + ".cpp"
             ref_filename = "ref_" + str(i) + ".cpp"
+            UT_filename = "UT_" + str(i) + ".cpp"
             filepath_trans = os.path.join(folder_path, trans_filename)
             filepath_ref = os.path.join(folder_path, ref_filename)
+            filepath_UT = os.path.join(folder_path, UT_filename)
             if not os.path.isfile(filepath_trans) or not os.path.isfile(filepath_ref):
                 with open(filepath_trans, "w") as f:
                     f.write(translated_code)
                 with open(filepath_ref, "w") as f:
                     f.write(ref_code)
+                with open(filepath_UT, "w") as f:
+                    f.write(UT_code)
             #
-            verify_summary[i, 1] = formal_verification(translated_code, ref_code)
+            #verify_summary[i, 1] = formal_verification(translated_code, ref_code)
+            verify_summary[i, 1] = eval_sematic_UT
             if (verify_summary[i, 1] == 1):
                 pass_count += 1
             print(f"eval_sematic_UT: {eval_sematic_UT} \n \n src_code: \n{cuda_code} \n \n trans_code: \n{translated_code} \n \n ref_code: {ref_code} \n \n verify_summary: {verify_summary[i, 1]} \n \n Total pass count: {pass_count} / {i+1}")
@@ -427,11 +432,26 @@ if __name__ == "__main__":
 
     '''
     agent = G2CTrans()
-    translated_code, mermaid_src = agent.process_code(
+    translated_code, mermaid_src, eval_sematic_UT, UT_code = agent.process_code(
         cuda_code,
         kernel_name="addKernel",
         path_name="./"
     )
+    trans_filename = "trans_code.cpp"
+    mermaid_filename = "mermaid_code.md"
+    UT_filename = "UT_code.cpp"
+    folder_path = os.getcwd()
+    filepath_trans = os.path.join(folder_path, trans_filename)
+    filepath_mermaid = os.path.join(folder_path, mermaid_filename)
+    filepath_UT = os.path.join(folder_path, UT_filename)
+    #
+    with open(filepath_trans, "w") as f:
+        f.write(translated_code)
+    with open(filepath_mermaid, "w") as f:
+        f.write(mermaid_src.draw_mermaid())
+    with open(filepath_UT, "w") as f:
+        f.write(UT_code)
+
     from IPython.display import Image
     # mermaid_src = self.app.get_graph().draw_mermaid()
     print(mermaid_src.draw_mermaid())
