@@ -27,7 +27,7 @@
 
 &emsp; The difference of AlphaEvolve from FunSearch is as follows:
 
-<img src="/Users/chenglong/Library/Application\ Support/typora-user-images/image-20251012214611847.png" alt="image-20251012214611847" style="zoom:50%;" />
+<img src="./.images/image-20251012214611847.png" alt="image-20251012214611847" style="zoom:50%;" />
 
 * The **scenarios** have been solved in AlphaEvolve:
 
@@ -44,25 +44,25 @@
 
   > *AlphaEvolve* is implemented as an **asynchronous computational pipeline** (using the **asyncio** Python library) in which many computations are run concurrently, with each computation blocking (waiting) whenever its next step relies on the result of another, yet unfinished computation.
 
-<img src="/Users/chenglong/Library/Application\ Support/typora-user-images/image-20251012220514149.png" alt="image-20251012220514149" style="zoom:40%;" />
+<img src="./.images/image-20251012220514149.png" alt="image-20251012220514149" style="zoom:40%;" />
 
 The details for the framework design of AlphaEvolve: 
 
-<img src="/Users/chenglong/Library/Application\ Support/typora-user-images/image-20251012222127745.png" alt="image-20251012222127745" style="zoom:30%;" />
+<img src="./.images/image-20251012222127745.png" alt="image-20251012222127745" style="zoom:30%;" />
 
 * For **long and comlete programs** which widely exist in practical applications, AlphaEvolve utilized the Macro Flag methods to help LLM figure out the parts to be evolved. This treatment is also beneficial for the evaluation of the generared results which usually need to be executed on real machines. (Have a look at the (a) - "# EVOLVE-BLOCK START ... ... # EVOLVE-BLOCK-END")
 
-  <img src="/Users/chenglong/Library/Application\ Support/typora-user-images/image-20251012223009316.png" alt="image-20251012223009316" style="zoom:50%;" />
+  <img src="./.images/image-20251012223009316.png" alt="image-20251012223009316" style="zoom:50%;" />
 
-  <img src="/Users/chenglong/Library/Application\ Support/typora-user-images/image-20251012225250043.png" alt="image-20251012225250043" style="zoom:25%;" />
+  <img src="./.images/image-20251012225250043.png" alt="image-20251012225250043" style="zoom:25%;" />
 
 * For prompt desigh in AlphaEvolve, the following principles are adopted: (**Question: How to tackle long context problems?**)
 
-  <img src="/Users/chenglong/Library/Application\ Support/typora-user-images/image-20251012223433276.png" alt="image-20251012223433276" style="zoom:40%;" />
+  <img src="./.images/image-20251012223433276.png" alt="image-20251012223433276" style="zoom:40%;" />
 
 * AlphaEvolve utilized the mixed models (Gemini 2.0 Flash +  Gemini 2.0 Pro) named ensemble approach to simultaneously maintain **the lower latency to enable a higher rate of candidate generation and increasing the number of ideas explored per unit of time** (Flash Model) as well as provides **occasional, higher-quality suggestions that can significantly advance the evolutionary search and potentially lead to breakthroughs.** (Pro Model)
 
-<img src="/Users/chenglong/Library/Application\ Support/typora-user-images/image-20251013045315520.png" alt="image-20251013045315520" style="zoom:50%;" />
+<img src="./.images/image-20251013045315520.png" alt="image-20251013045315520" style="zoom:50%;" />
 
 #### 2.2 **Qimeng-Attention**
 
